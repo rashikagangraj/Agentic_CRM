@@ -7,6 +7,7 @@ import { ModeToggle } from "./mode-toggle"
 import { ThemeToggle } from "./theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { BrandMark } from "@/components/ui/brand-mark"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,24 +42,34 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 z-30 h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300",
+        "fixed top-0 right-0 z-30 h-16 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl transition-all duration-300",
         sidebarOpen ? "left-64" : "left-16",
       )}
     >
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 pr-3 border-r border-slate-200 dark:border-slate-800">
+            <BrandMark variant="icon" size="sm" />
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Agentic <span className="hm-grad font-bold">CRM</span>
+            </span>
+          </div>
+
           <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search..." className="w-64 pl-9 bg-muted/50 border-0 focus-visible:ring-1" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search leads, campaigns, agents..."
+              className="w-72 pl-9 h-9 rounded-full bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/80 text-sm focus-visible:ring-2 focus-visible:ring-primary/20"
+            />
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <ModeToggle />
 
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
+          <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+            <Bell className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+            <Badge className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full p-0 text-[10px] bg-primary text-white flex items-center justify-center border-2 border-white dark:border-slate-900">
               3
             </Badge>
           </Button>
@@ -67,32 +78,32 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <Avatar className="h-9 w-9">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.photoURL || ""} alt="User" />
-                  <AvatarFallback>{userInitials}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold text-xs">{userInitials}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
+            <DropdownMenuContent className="w-56 rounded-2xl glass-card p-1.5" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal p-2">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{businessProfile?.ownerName || "User"}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user?.email || "user@example.com"}</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-none">{businessProfile?.ownerName || "Business Owner"}</p>
+                  <p className="text-xs leading-none text-slate-500">{user?.email || "owner@business.com"}</p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
-                <User className="mr-2 h-4 w-4" />
+              <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-800 my-1" />
+              <DropdownMenuItem className="rounded-lg cursor-pointer text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => router.push("/dashboard/profile")}>
+                <User className="mr-2 h-4 w-4 text-slate-500" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
-                <Settings className="mr-2 h-4 w-4" />
+              <DropdownMenuItem className="rounded-lg cursor-pointer text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => router.push("/dashboard/settings")}>
+                <Settings className="mr-2 h-4 w-4 text-slate-500" />
                 <span>Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
+              <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-800 my-1" />
+              <DropdownMenuItem className="rounded-lg cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4 text-red-500" />
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -102,3 +113,4 @@ export function Header() {
     </header>
   )
 }
+

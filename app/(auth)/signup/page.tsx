@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { BrandMark } from '@/components/ui/brand-mark';
 import { toast } from 'sonner';
 import type { BusinessCategory } from '@/lib/types';
 
@@ -136,22 +137,22 @@ export default function SignupPage() {
     };
 
     const renderStepIndicator = () => (
-        <div className="flex items-center justify-center space-x-4 mb-8">
+        <div className="flex items-center justify-center space-x-4 mb-6">
             {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                     <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${currentStep === step
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white scale-110'
+                        className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${currentStep === step
+                            ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/30 ring-4 ring-primary/15'
                             : currentStep > step
-                                ? 'bg-green-500 text-white'
-                                : 'bg-slate-700 text-slate-400'
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
                             }`}
                     >
-                        {currentStep > step ? <Check className="w-5 h-5" /> : step}
+                        {currentStep > step ? <Check className="w-4 h-4" /> : step}
                     </div>
                     {step < 3 && (
                         <div
-                            className={`w-16 h-1 mx-2 transition-all duration-300 ${currentStep > step ? 'bg-green-500' : 'bg-slate-700'
+                            className={`w-14 h-1 mx-2 rounded-full transition-all duration-300 ${currentStep > step ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'
                                 }`}
                         />
                     )}
@@ -161,22 +162,25 @@ export default function SignupPage() {
     );
 
     return (
-        <Card className="w-full max-w-2xl mx-auto backdrop-blur-xl bg-slate-900/80 border-slate-700/50 shadow-2xl">
-            <CardHeader className="space-y-2 text-center">
-                <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-2">
-                    <UserPlus className="w-6 h-6 text-white" />
+        <Card className="w-full max-w-2xl mx-auto glass-card shadow-2xl rounded-3xl border-slate-200/80 dark:border-slate-800/80">
+            <CardHeader className="space-y-3 text-center pt-8 pb-4">
+                <div className="mx-auto flex items-center justify-center">
+                    <BrandMark variant="full" size="lg" />
                 </div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                    Create Your Business Account
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                    {currentStep === 1 && 'Let\'s start with your account details'}
-                    {currentStep === 2 && 'Tell us about your business'}
-                    {currentStep === 3 && 'What are your best-selling products?'}
-                </CardDescription>
+                <div className="space-y-1">
+                    <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white">
+                        Create Your <span className="animated-gradient">Business Account</span>
+                    </CardTitle>
+                    <CardDescription className="text-slate-500 dark:text-slate-400 text-sm">
+                        {currentStep === 1 && "Let's start with your account details"}
+                        {currentStep === 2 && 'Tell us about your business'}
+                        {currentStep === 3 && 'What are your best-selling products?'}
+                    </CardDescription>
+                </div>
             </CardHeader>
 
             {renderStepIndicator()}
+
 
             {/* Step 1: Account Details */}
             {currentStep === 1 && (

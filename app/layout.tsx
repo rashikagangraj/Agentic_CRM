@@ -14,25 +14,16 @@ const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100", "200
 const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200", "300", "400", "500", "600", "700", "800", "900"] })
 
 export const metadata: Metadata = {
-  title: "Agentic CRM - AI-Driven Business Management",
-  description: "An AI-driven business management platform for vendors and customers",
-  generator: "v0.app",
+  title: "aiKart — Agentic CRM | AI-Driven Business Management",
+  description: "An AI-driven business management platform for vendors and customers powered by aiKart agentic workflows",
+  generator: "aiKart.co",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/logo-icon.png",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/logo-icon.png",
   },
 }
 
@@ -48,8 +39,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <body className={`font-sans antialiased bg-background text-foreground`}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <AuthProvider>
             {children}
           </AuthProvider>
