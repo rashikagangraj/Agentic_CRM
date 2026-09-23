@@ -36,22 +36,18 @@ export async function POST(req: Request) {
         const geminiApiKey = process.env.GEMINI_API_KEY;
 
         if (!text || typeof text !== 'string') {
-            return NextResponse.json({
-                workflow: workflow || "research",
-                businessName: "Sample Business",
-                niche: "CRM & Automation",
-                category: "technology"
-            }, { status: 200, headers: corsHeaders });
+            return NextResponse.json(
+                { error: "Missing required field: text" },
+                { status: 400, headers: corsHeaders }
+            );
         }
 
         if (!geminiApiKey) {
-            console.warn("Missing GEMINI_API_KEY - returning fallback extracted entities");
-            return NextResponse.json({
-                workflow: workflow || "research",
-                businessName: "Sample Business",
-                niche: "CRM & Automation",
-                category: "technology"
-            }, { status: 200, headers: corsHeaders });
+            console.error("Missing GEMINI_API_KEY");
+            return NextResponse.json(
+                { error: "Server configuration error: Missing GEMINI_API_KEY" },
+                { status: 500, headers: corsHeaders }
+            );
         }
 
         const knownWorkflow = workflow === 'research' || workflow === 'generate' ? workflow : null;
@@ -99,13 +95,8 @@ ${text}
     } catch (error: any) {
         console.error('Extraction API Error:', error);
         return NextResponse.json(
-            {
-                workflow: "research",
-                businessName: "Sample Business",
-                niche: "CRM & Automation",
-                category: "technology"
-            },
-            { status: 200, headers: corsHeaders }
+            { error: 'Failed to extract structured input', details: error.message },
+            { status: 500, headers: corsHeaders }
         );
     }
 }

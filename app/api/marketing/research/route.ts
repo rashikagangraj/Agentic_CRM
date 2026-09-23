@@ -42,34 +42,30 @@ export async function POST(req: Request) {
         const profile = businessProfile || {};
         const config = marketingConfig || {};
 
-        const businessName = profile.businessName || body.businessName || "Sample Business";
-        const niche = profile.niche || body.niche || "CRM & Automation";
+        // businessName/niche identify the business — faking them (e.g. "Sample
+        // Business") would produce a report that's confidently wrong rather
+        // than a clear error. category/city are just descriptive context, so
+        // those can safely default.
+        const businessName = profile.businessName || body.businessName;
+        const niche = profile.niche || body.niche;
+        if (!businessName || !niche) {
+            return NextResponse.json(
+                { error: "Missing required field: businessName and niche are required" },
+                { status: 400, headers: corsHeaders }
+            );
+        }
         const category = profile.category || body.category || "services";
         const city = profile.address?.city || profile.city || body.city || "National/Global";
 
         const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
         const geminiApiKey = process.env.GEMINI_API_KEY;
 
-        if (!geminiApiKey && !perplexityApiKey) {
-            console.warn("Missing GEMINI_API_KEY - returning simulated market research report");
-            return NextResponse.json({
-                summary: `The market for ${niche} in ${city} is growing steadily with significant digital opportunities for ${businessName}.`,
-                competitors: [
-                    { name: "Big Corp Inc", strength: "High brand recognition", weakness: "Slow customer turnaround" },
-                    { name: "Local Hero Ltd", strength: "Strong regional trust", weakness: "Outdated digital presence" },
-                    { name: "Budget Options LLC", strength: "Low entry pricing", weakness: "Limited feature depth" }
-                ],
-                trends: [
-                    "Accelerated adoption of AI workflows in CRM",
-                    "Shift towards omnichannel customer touchpoints",
-                    "Demand for transparent automated reporting"
-                ],
-                strategy: [
-                    "Focus digital campaigns on high-converting decision makers",
-                    "Emphasize responsive onboarding and automated pipeline tracking",
-                    "Leverage structured market intelligence in weekly reviews"
-                ]
-            });
+        if (!geminiApiKey) {
+            console.error("Missing GEMINI_API_KEY");
+            return NextResponse.json(
+                { error: "Server configuration error: Missing GEMINI_API_KEY" },
+                { status: 500, headers: corsHeaders }
+            );
         }
 
         let rawResearchText = "";
@@ -265,15 +261,8 @@ ${rawResearchText}
     } catch (error: any) {
         console.error("Research API Error:", error);
         return NextResponse.json(
-            {
-                summary: "Market research analysis completed for target business niche.",
-                competitors: [
-                    { name: "Leading Market Player", strength: "Broad brand reach", weakness: "Legacy technology stack" }
-                ],
-                trends: ["AI-driven workflow automation", "Omnichannel integration"],
-                strategy: ["Focus on high-converting client segments", "Automate pipeline reviews"]
-            },
-            { status: 200, headers: corsHeaders }
+            { error: "Failed to complete research", details: error.message },
+            { status: 500, headers: corsHeaders }
         );
     }
 }

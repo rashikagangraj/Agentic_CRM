@@ -29,8 +29,18 @@ export async function POST(req: Request) {
         const { topic, tone, format, businessContext } = body;
         const ctx = businessContext || {};
 
-        const businessName = ctx.businessName || body.businessName || "Sample Business";
-        const niche = ctx.niche || body.niche || "CRM & Automation";
+        // businessName/niche identify the business — faking them (e.g. "Sample
+        // Business") would produce content that's confidently wrong rather
+        // than a clear error. category/targetAudience/topic/tone/format are
+        // just style/context parameters, so those can safely default.
+        const businessName = ctx.businessName || body.businessName;
+        const niche = ctx.niche || body.niche;
+        if (!businessName || !niche) {
+            return NextResponse.json(
+                { error: "Missing required field: businessName and niche are required" },
+                { status: 400, headers: corsHeaders }
+            );
+        }
         const category = ctx.category || body.category || 'services';
         const targetAudience = ctx.targetAudience || body.targetAudience || 'General audience';
         const postTopic = topic || body.topic || 'Product Launch';
@@ -40,10 +50,11 @@ export async function POST(req: Request) {
         const geminiApiKey = process.env.GEMINI_API_KEY;
 
         if (!geminiApiKey) {
-            console.warn("Missing GEMINI_API_KEY - returning simulated marketing content");
-            return NextResponse.json({
-                content: `🚀 Announcing the next generation of ${businessName}! Empowering businesses in ${niche} with smart automation and seamless client workflows. #AI #CRM #${category.replace(/[^a-zA-Z0-9]/g, '')}`
-            }, { status: 200, headers: corsHeaders });
+            console.error("Missing GEMINI_API_KEY");
+            return NextResponse.json(
+                { error: "Server configuration error: Missing GEMINI_API_KEY" },
+                { status: 500, headers: corsHeaders }
+            );
         }
 
         const ai = new GoogleGenAI({ apiKey: geminiApiKey });
