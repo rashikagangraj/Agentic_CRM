@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,10 +18,14 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
+  Trash2,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { EmployeeForm } from "@/components/forms/employee-form"
+import { toast } from "sonner"
 
-const employees = [
+const initialEmployees = [
   {
     id: "1",
     name: "Sarah Miller",
@@ -59,7 +64,7 @@ const employees = [
   },
 ]
 
-const tasks = [
+const initialTasks = [
   {
     id: "1",
     title: "Complete project proposal",
@@ -109,10 +114,25 @@ const payroll = [
 ]
 
 export default function EmployeesPage() {
+  const [employees, setEmployees] = useState(initialEmployees)
+  const [tasks, setTasks] = useState(initialTasks)
+  const [employeeFormOpen, setEmployeeFormOpen] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState<(typeof initialEmployees)[number] | null>(null)
+
+  const completeTask = (id: string) => {
+    setTasks((current) => current.map((t) => (t.id === id ? { ...t, status: "completed" } : t)))
+    toast.success("Task marked as completed")
+  }
+
+  const deleteTask = (id: string) => {
+    setTasks((current) => current.filter((t) => t.id !== id))
+    toast.success("Task removed")
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Employees" description="Manage your team members and their activities">
-        <Button>
+        <Button onClick={() => setEmployeeFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Employee
         </Button>
@@ -172,9 +192,13 @@ export default function EmployeesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Assign Task</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setSelectedEmployee(employee)}>View Profile</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.info("Editing employees is coming soon")}>
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.info("Task assignment is coming soon")}>
+                          Assign Task
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -208,7 +232,7 @@ export default function EmployeesPage() {
                 <CardTitle>Task Assignments</CardTitle>
                 <CardDescription>Track and manage employee tasks</CardDescription>
               </div>
-              <Button size="sm">
+              <Button size="sm" onClick={() => toast.info("New task creation is coming soon")}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Task
               </Button>
@@ -248,9 +272,25 @@ export default function EmployeesPage() {
                           variant={task.priority === "high" ? "error" : task.priority === "medium" ? "warning" : "info"}
                         />
                       </div>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {task.status !== "completed" && (
+                            <DropdownMenuItem onClick={() => completeTask(task.id)}>
+                              <CheckCircle2 className="mr-2 h-4 w-4" />
+                              Mark Completed
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem className="text-destructive" onClick={() => deleteTask(task.id)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))}
@@ -317,7 +357,9 @@ export default function EmployeesPage() {
                 <CardTitle>Payroll & Incentives</CardTitle>
                 <CardDescription>December 2025 payroll summary</CardDescription>
               </div>
-              <Button variant="outline">Process Payroll</Button>
+              <Button variant="outline" onClick={() => toast.success("Payroll processed")}>
+                Process Payroll
+              </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -348,6 +390,54 @@ export default function EmployeesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <EmployeeForm
+        open={employeeFormOpen}
+        onOpenChange={setEmployeeFormOpen}
+        onSubmit={(data) => {
+          setEmployees((current) => [
+            ...current,
+            {
+              id: crypto.randomUUID(),
+              name: data.name,
+              email: data.email,
+              role: data.role,
+              department: data.department || "Unassigned",
+              status: "active",
+              avatar: "",
+            },
+          ])
+          toast.success("Employee added")
+        }}
+      />
+
+      <Dialog open={!!selectedEmployee} onOpenChange={(open) => !open && setSelectedEmployee(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedEmployee?.name}</DialogTitle>
+            <DialogDescription>{selectedEmployee?.role}</DialogDescription>
+          </DialogHeader>
+          {selectedEmployee && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Department</span>
+                <span className="font-medium">{selectedEmployee.department}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Email</span>
+                <span className="font-medium">{selectedEmployee.email}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedEmployee.status}
+                  variant={selectedEmployee.status === "active" ? "success" : "error"}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,13 +1,26 @@
 "use client"
 
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { StatCard } from "@/components/ui/stat-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Search, Star, ThumbsUp, MessageSquare, TrendingUp, Filter } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
 
 const feedbackStats = {
   averageRating: 4.6,
@@ -63,14 +76,52 @@ const recentFeedback = [
   },
 ]
 
+type FilterOption = "all" | "unresponded" | "five-star"
+
 export function BusinessFeedback() {
+  const [feedbackList, setFeedbackList] = useState(recentFeedback)
+  const [filter, setFilter] = useState<FilterOption>("all")
+  const [respondingTo, setRespondingTo] = useState<(typeof recentFeedback)[number] | null>(null)
+  const [responseText, setResponseText] = useState("")
+
+  const filteredFeedback = feedbackList.filter((feedback) => {
+    if (filter === "unresponded") return !feedback.responded
+    if (filter === "five-star") return feedback.rating === 5
+    return true
+  })
+
+  const submitResponse = () => {
+    if (!respondingTo) return
+    setFeedbackList((current) =>
+      current.map((f) => (f.id === respondingTo.id ? { ...f, responded: true } : f)),
+    )
+    toast.success("Response sent")
+    setResponseText("")
+    setRespondingTo(null)
+  }
+
+  const filterLabels: Record<FilterOption, string> = {
+    all: "All Reviews",
+    unresponded: "Needs Response",
+    "five-star": "5-Star Only",
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Feedback & Reviews" description="Monitor customer satisfaction and ratings">
-        <Button variant="outline">
-          <Filter className="mr-2 h-4 w-4" />
-          Filter
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Filter className="mr-2 h-4 w-4" />
+              {filterLabels[filter]}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setFilter("all")}>All Reviews</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setFilter("unresponded")}>Needs Response</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setFilter("five-star")}>5-Star Only</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -131,7 +182,7 @@ export function BusinessFeedback() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentFeedback.map((feedback) => (
+              {filteredFeedback.map((feedback) => (
                 <div key={feedback.id} className="p-4 rounded-lg border bg-card">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -169,7 +220,7 @@ export function BusinessFeedback() {
                         Responded
                       </span>
                     ) : (
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => setRespondingTo(feedback)}>
                         Respond
                       </Button>
                     )}
@@ -180,6 +231,28 @@ export function BusinessFeedback() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={!!respondingTo} onOpenChange={(open) => !open && setRespondingTo(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Respond to {respondingTo?.customerName}</DialogTitle>
+            <DialogDescription>{respondingTo?.comment}</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <Textarea
+              placeholder="Write your response..."
+              rows={4}
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button onClick={submitResponse}>Send Response</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

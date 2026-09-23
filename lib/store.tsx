@@ -1,13 +1,18 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode, type Dispatch, type SetStateAction } from "react"
 import type { AccountMode } from "./types"
+import { initialLeads, initialContentItems, type Lead, type ContentItem } from "./mock-data"
 
 interface StoreContextType {
   mode: AccountMode
   setMode: (mode: AccountMode) => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
+  leads: Lead[]
+  setLeads: Dispatch<SetStateAction<Lead[]>>
+  contentItems: ContentItem[]
+  setContentItems: Dispatch<SetStateAction<ContentItem[]>>
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined)
@@ -21,9 +26,15 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined)
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<AccountMode>("business")
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [leads, setLeads] = useState<Lead[]>(initialLeads)
+  const [contentItems, setContentItems] = useState<ContentItem[]>(initialContentItems)
 
   return (
-    <StoreContext.Provider value={{ mode, setMode, sidebarOpen, setSidebarOpen }}>{children}</StoreContext.Provider>
+    <StoreContext.Provider
+      value={{ mode, setMode, sidebarOpen, setSidebarOpen, leads, setLeads, contentItems, setContentItems }}
+    >
+      {children}
+    </StoreContext.Provider>
   )
 }
 

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, Tag, Gift, Percent, Clock, Star, Building2 } from "lucide-react"
+import { toast } from "sonner"
 
 const personalizedOffers = [
   {
@@ -179,7 +180,9 @@ export default function OffersPage() {
                         <Clock className="h-4 w-4" />
                         Valid until {offer.validUntil}
                       </div>
-                      <Button size="sm">Claim Offer</Button>
+                      <Button size="sm" onClick={() => toast.success(`Offer claimed: ${offer.title}`)}>
+                        Claim Offer
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -216,7 +219,9 @@ export default function OffersPage() {
                         <div className="bg-primary/10 text-primary px-3 py-1 rounded-md text-lg font-bold mb-2">
                           {deal.discount}% OFF
                         </div>
-                        <Button size="sm">Get Deal</Button>
+                        <Button size="sm" onClick={() => toast.success(`Deal claimed: ${deal.title}`)}>
+                          Get Deal
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -253,7 +258,9 @@ export default function OffersPage() {
                         <p className="text-sm">Valid until {offer.validUntil}</p>
                         <p className="text-xs text-muted-foreground">Saved on {offer.savedOn}</p>
                       </div>
-                      <Button size="sm">Use Now</Button>
+                      <Button size="sm" onClick={() => toast.success(`Using offer: ${offer.title}`)}>
+                        Use Now
+                      </Button>
                     </div>
                   </div>
                 ))}

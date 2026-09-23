@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,8 +19,10 @@ import {
   MapPin,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { toast } from "sonner"
 
-const friends = [
+const initialFriends = [
   {
     id: "1",
     name: "Alice Johnson",
@@ -50,7 +53,7 @@ const friends = [
   },
 ]
 
-const groups = [
+const initialGroups = [
   {
     id: "1",
     name: "Tech Enthusiasts",
@@ -89,13 +92,13 @@ const groups = [
   },
 ]
 
-const suggestions = [
+const initialSuggestions = [
   { id: "1", name: "Emma Davis", mutualFriends: 15, avatar: "/suggestion-1.jpg" },
   { id: "2", name: "Frank Wilson", mutualFriends: 8, avatar: "/suggestion-2.jpg" },
   { id: "3", name: "Grace Taylor", mutualFriends: 6, avatar: "/suggestion-3.jpg" },
 ]
 
-const upcomingEvents = [
+const initialEvents = [
   {
     id: "1",
     title: "Tech Meetup December",
@@ -115,6 +118,44 @@ const upcomingEvents = [
 ]
 
 export default function CommunityPage() {
+  const [friends, setFriends] = useState(initialFriends)
+  const [groups, setGroups] = useState(initialGroups)
+  const [suggestions, setSuggestions] = useState(initialSuggestions)
+  const [events, setEvents] = useState(initialEvents)
+  const [selectedFriend, setSelectedFriend] = useState<(typeof initialFriends)[number] | null>(null)
+
+  const removeFriend = (id: string) => {
+    setFriends((current) => current.filter((f) => f.id !== id))
+    toast.success("Friend removed")
+  }
+
+  const addFriend = (suggestion: (typeof initialSuggestions)[number]) => {
+    setSuggestions((current) => current.filter((s) => s.id !== suggestion.id))
+    setFriends((current) => [
+      ...current,
+      { id: suggestion.id, name: suggestion.name, status: "offline", mutualFriends: suggestion.mutualFriends, avatar: suggestion.avatar },
+    ])
+    toast.success(`${suggestion.name} added as a friend`)
+  }
+
+  const toggleJoined = (id: string) => {
+    setGroups((current) =>
+      current.map((group) => {
+        if (group.id !== id) return group
+        const joined = !group.joined
+        toast.success(joined ? `Joined ${group.name}` : `Left ${group.name}`)
+        return { ...group, joined, members: group.members + (joined ? 1 : -1) }
+      }),
+    )
+  }
+
+  const rsvpEvent = (id: string) => {
+    setEvents((current) =>
+      current.map((event) => (event.id === id ? { ...event, attendees: event.attendees + 1 } : event)),
+    )
+    toast.success("RSVP confirmed")
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Community" description="Connect with friends and join groups" />
@@ -217,7 +258,11 @@ export default function CommunityPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toast.info("Messaging is coming soon")}
+                        >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
@@ -227,9 +272,15 @@ export default function CommunityPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>View Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Send Message</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Remove Friend</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setSelectedFriend(friend)}>
+                              View Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.info("Messaging is coming soon")}>
+                              Send Message
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => removeFriend(friend.id)}>
+                              Remove Friend
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -263,7 +314,7 @@ export default function CommunityPage() {
                           <p className="text-xs text-muted-foreground">{suggestion.mutualFriends} mutual</p>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => addFriend(suggestion)}>
                         <UserPlus className="h-4 w-4" />
                       </Button>
                     </div>
@@ -296,7 +347,11 @@ export default function CommunityPage() {
                       <p className="text-sm text-muted-foreground mb-2">{group.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">{group.members.toLocaleString()} members</span>
-                        <Button size="sm" variant={group.joined ? "secondary" : "default"}>
+                        <Button
+                          size="sm"
+                          variant={group.joined ? "secondary" : "default"}
+                          onClick={() => toggleJoined(group.id)}
+                        >
                           {group.joined ? "Joined" : "Join"}
                         </Button>
                       </div>
@@ -316,7 +371,7 @@ export default function CommunityPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {upcomingEvents.map((event) => (
+                {events.map((event) => (
                   <div key={event.id} className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                     <div className="flex items-start justify-between">
                       <div>
@@ -337,7 +392,9 @@ export default function CommunityPage() {
                           </div>
                         </div>
                       </div>
-                      <Button size="sm">RSVP</Button>
+                      <Button size="sm" onClick={() => rsvpEvent(event.id)}>
+                        RSVP
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -346,6 +403,21 @@ export default function CommunityPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!selectedFriend} onOpenChange={(open) => !open && setSelectedFriend(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedFriend?.name}</DialogTitle>
+            <DialogDescription>{selectedFriend?.mutualFriends} mutual friends</DialogDescription>
+          </DialogHeader>
+          {selectedFriend && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Status</span>
+              <span className="font-medium capitalize">{selectedFriend.status}</span>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

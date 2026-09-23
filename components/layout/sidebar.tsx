@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-const businessNavItems = [
+export const businessNavItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Profile", href: "/dashboard/profile", icon: User },
   { title: "Management", href: "/dashboard/management", icon: Package },
@@ -39,7 +39,7 @@ const businessNavItems = [
   { title: "Support", href: "/dashboard/support", icon: HelpCircle },
 ]
 
-const personalNavItems = [
+export const personalNavItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Profile", href: "/dashboard/profile", icon: User },
   { title: "Activities", href: "/dashboard/activities", icon: ShoppingBag },

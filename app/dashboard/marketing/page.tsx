@@ -38,50 +38,14 @@ import {
   BrainCircuit,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
+import { useStore } from "@/lib/store"
 import { MarketingSetup } from "@/components/dashboard/marketing-setup"
 import { ResearchTab } from "@/components/dashboard/marketing/research-tab"
 import { NanoBananaGenerator } from "@/components/dashboard/marketing/nano-banana-generator"
 
 
-const contentItems = [
-  {
-    id: "1",
-    title: "New Year Sale Announcement",
-    content: "Start the year right with amazing deals...",
-    channel: "whatsapp",
-    status: "approved",
-    scheduledAt: "Jan 1, 2026, 10:00 AM",
-    createdAt: "Dec 5, 2025",
-  },
-  {
-    id: "2",
-    title: "Product Launch Teaser",
-    content: "Something exciting is coming...",
-    channel: "instagram",
-    status: "pending",
-    scheduledAt: null,
-    createdAt: "Dec 6, 2025",
-  },
-  {
-    id: "3",
-    title: "Customer Success Story",
-    content: "See how Company X grew 200%...",
-    channel: "facebook",
-    status: "draft",
-    scheduledAt: null,
-    createdAt: "Dec 7, 2025",
-  },
-  {
-    id: "4",
-    title: "Holiday Greetings",
-    content: "Wishing you a wonderful holiday season...",
-    channel: "twitter",
-    status: "published",
-    scheduledAt: null,
-    createdAt: "Dec 1, 2025",
-  },
-]
 
 const channelIcons = {
   whatsapp: MessageCircle,
@@ -100,6 +64,26 @@ const channelColors = {
 export default function MarketingPage() {
   const { businessProfile, loading } = useAuth()
   const [isGenerating, setIsGenerating] = useState(false)
+  const { contentItems, setContentItems } = useStore()
+
+  const approveContent = (id: string) => {
+    setContentItems((items) => items.map((item) => (item.id === id ? { ...item, status: "approved" } : item)))
+    toast.success("Content approved")
+  }
+
+  const scheduleContent = (id: string) => {
+    setContentItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, scheduledAt: new Date(Date.now() + 86400000).toLocaleString() } : item,
+      ),
+    )
+    toast.success("Content scheduled")
+  }
+
+  const deleteContent = (id: string) => {
+    setContentItems((items) => items.filter((item) => item.id !== id))
+    toast.success("Content deleted")
+  }
 
   if (loading) {
     return (
@@ -109,12 +93,28 @@ export default function MarketingPage() {
     )
   }
 
-  if (!businessProfile?.marketing) {
-    return <MarketingSetup />
-  }
-
   return (
     <div className="space-y-6">
+      {!businessProfile?.marketing && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold text-sm">Marketing Profile Not Configured</p>
+              <p className="text-xs text-muted-foreground">
+                You can run the AI Agent Runner below with any custom prompt, or complete the setup to save defaults.
+              </p>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">Configure Setup</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <MarketingSetup />
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
+      )}
       <PageHeader title="Marketing" description="Create and manage your marketing content with AI assistance">
         <Dialog>
           <DialogTrigger asChild>
@@ -241,118 +241,119 @@ export default function MarketingPage() {
               <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="all">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Marketing Content</CardTitle>
-                  <CardDescription>Manage all your marketing content in one place</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {contentItems.map((item) => {
-                      const ChannelIcon = channelIcons[item.channel as keyof typeof channelIcons]
-                      return (
-                        <div
-                          key={item.id}
-                          className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-start gap-4">
+            {(
+              [
+                { value: "all", items: contentItems, empty: "No content yet" },
+                {
+                  value: "draft",
+                  items: contentItems.filter((item) => item.status === "draft"),
+                  empty: "No draft content",
+                },
+                {
+                  value: "pending",
+                  items: contentItems.filter((item) => item.status === "pending"),
+                  empty: "No pending content",
+                },
+                {
+                  value: "approved",
+                  items: contentItems.filter((item) => item.status === "approved"),
+                  empty: "No approved content",
+                },
+                {
+                  value: "scheduled",
+                  items: contentItems.filter((item) => item.scheduledAt),
+                  empty: "No scheduled content",
+                },
+              ] as const
+            ).map(({ value, items, empty }) => (
+              <TabsContent key={value} value={value}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Marketing Content</CardTitle>
+                    <CardDescription>Manage all your marketing content in one place</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {items.length === 0 ? (
+                      <div className="py-8 text-center text-muted-foreground">{empty}</div>
+                    ) : (
+                      <div className="space-y-4">
+                        {items.map((item) => {
+                          const ChannelIcon = channelIcons[item.channel as keyof typeof channelIcons]
+                          return (
                             <div
-                              className={`p-2 rounded-lg bg-muted ${channelColors[item.channel as keyof typeof channelColors]}`}
+                              key={item.id}
+                              className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                             >
-                              <ChannelIcon className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium">{item.title}</p>
-                                <StatusBadge
-                                  status={item.status}
-                                  variant={
-                                    item.status === "published"
-                                      ? "success"
-                                      : item.status === "approved"
-                                        ? "info"
-                                        : item.status === "pending"
-                                          ? "warning"
-                                          : "default"
-                                  }
-                                />
+                              <div className="flex items-start gap-4">
+                                <div
+                                  className={`p-2 rounded-lg bg-muted ${channelColors[item.channel as keyof typeof channelColors]}`}
+                                >
+                                  <ChannelIcon className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium">{item.title}</p>
+                                    <StatusBadge
+                                      status={item.status}
+                                      variant={
+                                        item.status === "published"
+                                          ? "success"
+                                          : item.status === "approved"
+                                            ? "info"
+                                            : item.status === "pending"
+                                              ? "warning"
+                                              : "default"
+                                      }
+                                    />
+                                  </div>
+                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{item.content}</p>
+                                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                    <span>Created: {item.createdAt}</span>
+                                    {item.scheduledAt && <span>Scheduled: {item.scheduledAt}</span>}
+                                  </div>
+                                </div>
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{item.content}</p>
-                              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                                <span>Created: {item.createdAt}</span>
-                                {item.scheduledAt && <span>Scheduled: {item.scheduledAt}</span>}
-                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => toast.info("Editing content is coming soon")}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  {item.status === "pending" && (
+                                    <DropdownMenuItem onClick={() => approveContent(item.id)}>
+                                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                                      Approve
+                                    </DropdownMenuItem>
+                                  )}
+                                  {item.status === "approved" && (
+                                    <DropdownMenuItem onClick={() => scheduleContent(item.id)}>
+                                      <Calendar className="mr-2 h-4 w-4" />
+                                      Schedule
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => deleteContent(item.id)}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              {item.status === "pending" && (
-                                <DropdownMenuItem>
-                                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                                  Approve
-                                </DropdownMenuItem>
-                              )}
-                              {item.status === "approved" && (
-                                <DropdownMenuItem>
-                                  <Calendar className="mr-2 h-4 w-4" />
-                                  Schedule
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="draft">
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Filter showing draft content only
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="pending">
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Filter showing pending content only
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="approved">
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Filter showing approved content only
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="scheduled">
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  Filter showing scheduled content only
-                </CardContent>
-              </Card>
-            </TabsContent>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            ))}
           </Tabs>
         </TabsContent>
 

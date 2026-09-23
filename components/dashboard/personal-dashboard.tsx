@@ -1,11 +1,14 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/ui/page-header"
 import { StatCard } from "@/components/ui/stat-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { ShoppingBag, Calendar, Tag, Heart, ArrowRight, Star, Clock } from "lucide-react"
+import { toast } from "sonner"
 
 const recentActivities = [
   {
@@ -58,7 +61,7 @@ const personalizedOffers = [
   },
 ]
 
-const communityGroups = [
+const initialCommunityGroups = [
   { id: "1", name: "Tech Enthusiasts", members: 1234, joined: true },
   { id: "2", name: "Fitness Community", members: 567, joined: true },
   { id: "3", name: "Book Club", members: 89, joined: false },
@@ -71,6 +74,20 @@ const communityGroups = [
  * @returns The rendered personal dashboard component.
  */
 export function PersonalDashboard() {
+  const router = useRouter()
+  const [communityGroups, setCommunityGroups] = useState(initialCommunityGroups)
+
+  const toggleJoined = (id: string) => {
+    setCommunityGroups((groups) =>
+      groups.map((group) => {
+        if (group.id !== id) return group
+        const joined = !group.joined
+        toast.success(joined ? `Joined ${group.name}` : `Left ${group.name}`)
+        return { ...group, joined, members: group.members + (joined ? 1 : -1) }
+      }),
+    )
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Personal Dashboard" description="Welcome back! Here's what's happening in your world." />
@@ -89,7 +106,7 @@ export function PersonalDashboard() {
               <CardTitle>Recent Activities</CardTitle>
               <CardDescription>Your purchases and bookings</CardDescription>
             </div>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard/activities")}>
               View all
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -140,7 +157,7 @@ export function PersonalDashboard() {
               <CardTitle>Personalized Offers</CardTitle>
               <CardDescription>Exclusive deals for you</CardDescription>
             </div>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard/offers")}>
               View all
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -160,7 +177,7 @@ export function PersonalDashboard() {
                   </div>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-xs text-muted-foreground">Valid until {offer.validUntil}</span>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => toast.success(`Offer claimed: ${offer.title}`)}>
                       Claim
                     </Button>
                   </div>
@@ -177,7 +194,7 @@ export function PersonalDashboard() {
             <CardTitle>Your Communities</CardTitle>
             <CardDescription>Groups you're part of</CardDescription>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => router.push("/dashboard/community")}>
             Explore More
           </Button>
         </CardHeader>
@@ -194,7 +211,12 @@ export function PersonalDashboard() {
                     <p className="text-xs text-muted-foreground">{group.members.toLocaleString()} members</p>
                   </div>
                 </div>
-                <Button className="w-full mt-4" variant={group.joined ? "secondary" : "default"} size="sm">
+                <Button
+                  className="w-full mt-4"
+                  variant={group.joined ? "secondary" : "default"}
+                  size="sm"
+                  onClick={() => toggleJoined(group.id)}
+                >
                   {group.joined ? "Joined" : "Join"}
                 </Button>
               </div>

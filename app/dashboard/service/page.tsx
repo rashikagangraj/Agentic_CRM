@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,8 +22,10 @@ import {
   Plus,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { toast } from "sonner"
 
-const employeeStatus = [
+const initialEmployeeStatus = [
   {
     id: "1",
     name: "Sarah Miller",
@@ -107,7 +110,7 @@ const crossSellOpportunities = [
   },
 ]
 
-const serviceBilling = [
+const initialServiceBilling = [
   {
     id: "1",
     service: "Web Development",
@@ -130,10 +133,34 @@ const serviceBilling = [
 ]
 
 export default function ServicePage() {
+  const [employeeStatus, setEmployeeStatus] = useState(initialEmployeeStatus)
+  const [serviceBilling, setServiceBilling] = useState(initialServiceBilling)
+  const [selectedBilling, setSelectedBilling] = useState<(typeof initialServiceBilling)[number] | null>(null)
+
+  const toggleSignIn = (id: string) => {
+    setEmployeeStatus((current) =>
+      current.map((e) =>
+        e.id === id
+          ? {
+              ...e,
+              signedIn: !e.signedIn,
+              signInTime: !e.signedIn ? new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null,
+              currentTask: !e.signedIn ? e.currentTask : null,
+            }
+          : e,
+      ),
+    )
+  }
+
+  const markPaid = (id: string) => {
+    setServiceBilling((current) => current.map((b) => (b.id === id ? { ...b, status: "paid" } : b)))
+    toast.success("Marked as paid")
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Service" description="Manage service delivery and employee activities">
-        <Button>
+        <Button onClick={() => toast.info("Starting a new service entry is coming soon")}>
           <Plus className="mr-2 h-4 w-4" />
           New Service
         </Button>
@@ -203,7 +230,11 @@ export default function ServicePage() {
                           <p className="text-xs text-muted-foreground">{employee.currentTask}</p>
                         </div>
                       )}
-                      <Button variant={employee.signedIn ? "destructive" : "default"} size="sm">
+                      <Button
+                        variant={employee.signedIn ? "destructive" : "default"}
+                        size="sm"
+                        onClick={() => toggleSignIn(employee.id)}
+                      >
                         {employee.signedIn ? (
                           <>
                             <LogOut className="mr-2 h-4 w-4" />
@@ -296,8 +327,17 @@ export default function ServicePage() {
                       </p>
                     </div>
                     <div className="mt-3 flex gap-2">
-                      <Button size="sm">Create Offer</Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        onClick={() => toast.success(`Offer created for ${opportunity.customer}`)}
+                      >
+                        Create Offer
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toast.info("Detailed opportunity view is coming soon")}
+                      >
                         View Details
                       </Button>
                     </div>
@@ -315,7 +355,7 @@ export default function ServicePage() {
                 <CardTitle>Service Billing</CardTitle>
                 <CardDescription>Track service-based billing and payments</CardDescription>
               </div>
-              <Button size="sm">
+              <Button size="sm" onClick={() => toast.info("Adding billing entries is coming soon")}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Entry
               </Button>
@@ -348,9 +388,15 @@ export default function ServicePage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Create Invoice</DropdownMenuItem>
-                          <DropdownMenuItem>Mark as Paid</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedBilling(billing)}>
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info("Creating invoices from here is coming soon")}>
+                            Create Invoice
+                          </DropdownMenuItem>
+                          {billing.status !== "paid" && (
+                            <DropdownMenuItem onClick={() => markPaid(billing.id)}>Mark as Paid</DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -361,6 +407,44 @@ export default function ServicePage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!selectedBilling} onOpenChange={(open) => !open && setSelectedBilling(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedBilling?.service}</DialogTitle>
+            <DialogDescription>{selectedBilling?.customer}</DialogDescription>
+          </DialogHeader>
+          {selectedBilling && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Hours</span>
+                <span className="font-medium">{selectedBilling.hours}h</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Rate</span>
+                <span className="font-medium">${selectedBilling.rate}/h</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total</span>
+                <span className="font-medium">${selectedBilling.total.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedBilling.status}
+                  variant={
+                    selectedBilling.status === "paid"
+                      ? "success"
+                      : selectedBilling.status === "invoiced"
+                        ? "info"
+                        : "warning"
+                  }
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

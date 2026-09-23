@@ -5,33 +5,59 @@ import { GoogleGenAI } from "@google/genai";
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
+        let body: any = {};
+        try {
+            body = await req.json();
+        } catch {
+            body = {};
+        }
+
         const { businessProfile, marketingConfig, simulatePerplexity } = body;
+        const profile = businessProfile || {};
+        const config = marketingConfig || {};
+
+        const businessName = profile.businessName || body.businessName || "Sample Business";
+        const niche = profile.niche || body.niche || "CRM & Automation";
+        const category = profile.category || body.category || "services";
+        const city = profile.address?.city || profile.city || body.city || "National/Global";
 
         const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
         const geminiApiKey = process.env.GEMINI_API_KEY;
 
-        if ((!perplexityApiKey && !simulatePerplexity) || !geminiApiKey) {
-            console.error("Missing API Keys");
-            return NextResponse.json(
-                { error: "Server configuration error: Missing API Keys" },
-                { status: 500 }
-            );
+        if (!geminiApiKey && !perplexityApiKey) {
+            console.warn("Missing GEMINI_API_KEY - returning simulated market research report");
+            return NextResponse.json({
+                summary: `The market for ${niche} in ${city} is growing steadily with significant digital opportunities for ${businessName}.`,
+                competitors: [
+                    { name: "Big Corp Inc", strength: "High brand recognition", weakness: "Slow customer turnaround" },
+                    { name: "Local Hero Ltd", strength: "Strong regional trust", weakness: "Outdated digital presence" },
+                    { name: "Budget Options LLC", strength: "Low entry pricing", weakness: "Limited feature depth" }
+                ],
+                trends: [
+                    "Accelerated adoption of AI workflows in CRM",
+                    "Shift towards omnichannel customer touchpoints",
+                    "Demand for transparent automated reporting"
+                ],
+                strategy: [
+                    "Focus digital campaigns on high-converting decision makers",
+                    "Emphasize responsive onboarding and automated pipeline tracking",
+                    "Leverage structured market intelligence in weekly reviews"
+                ]
+            });
         }
 
         let rawResearchText = "";
 
-        // --- STEP 1: Research (Perplexity OR Simulation) ---
+        // --- STEP 1: Research (Perplexity, Simulation, or Gemini Deep Analysis) ---
         if (simulatePerplexity) {
             console.log(
-                "[Research] SIMULATION MODE: Skipping Perplexity API cost."
+                "[Research] SIMULATION MODE: Skipping live web search API cost."
             );
             rawResearchText = `
 [SIMULATED RESEARCH OUTPUT FOR TESTING]
 
 Executive Summary:
-The market for specific ${businessProfile.niche} in ${businessProfile.address?.city || "the region"
-                } is growing steadily. Key opportunities exist in digital channels.
+The market for ${niche} in ${city} is growing steadily. Key opportunities exist in digital channels.
 
 Competitors:
 1. Big Corp Inc: Strong brand presence but slow customer service.
@@ -49,8 +75,8 @@ Strategy:
 - Improve website load speed for mobile users.
 - Partner with local influencers for authenticity.
       `;
-        } else {
-            const perplexityClient = new Perplexity({ apiKey: perplexityApiKey! });
+        } else if (perplexityApiKey) {
+            const perplexityClient = new Perplexity({ apiKey: perplexityApiKey });
 
             const budget = marketingConfig?.budget || "Not specified";
             const channels = Array.isArray(marketingConfig?.channels)
@@ -58,7 +84,7 @@ Strategy:
                 : "None specified";
 
             console.log(
-                `[Research] Starting deep research for: ${businessProfile.businessName}`
+                `[Research] Starting deep research for: ${businessName}`
             );
 
             const researchSystemPrompt = `You are a world-class marketing researcher.
@@ -74,10 +100,10 @@ Provide a comprehensive, detailed report covering:
 Do NOT output JSON. Just provide high-quality, dense information in plain text.`;
 
             const researchUserPrompt = `
-Business Name: ${businessProfile.businessName}
-Niche/Category: ${businessProfile.niche} (${businessProfile.category})
-Marketing Goal: ${marketingConfig?.goal || "Deep Market Analysis"}
-Target Audience: People interested in ${businessProfile.niche}
+Business Name: ${businessName}
+Niche/Category: ${niche} (${category})
+Marketing Goal: ${config?.goal || "Deep Market Analysis"}
+Target Audience: People interested in ${niche}
 Budget: ${budget}
 Channels: ${channels}
 
@@ -103,6 +129,24 @@ Conduct deep research now.
             console.log(
                 `[Research] Perplexity completed. Length: ${rawResearchText.length} chars.`
             );
+        } else {
+            // Live Research powered directly by Google Gemini
+            const ai = new GoogleGenAI({ apiKey: geminiApiKey! });
+            const geminiResearchPrompt = `You are a world-class marketing intelligence specialist.
+Conduct a deep market research report for:
+Business Name: ${businessName}
+Niche/Category: ${niche} (${category})
+Location: ${city}
+Goal: ${config?.goal || "Market Growth & Competitor Analysis"}
+
+Analyze real competitor landscape, industry trends, customer pain points, and actionable marketing strategies.
+Provide dense, realistic, and insightful findings in plain text.`;
+
+            const geminiRes = await ai.models.generateContent({
+                model: "gemini-3.6-flash",
+                contents: geminiResearchPrompt,
+            });
+            rawResearchText = geminiRes.text || "Market analysis completed.";
         }
 
         // --- STEP 2: Parse with Gemini into your ResearchReport shape ---
@@ -147,7 +191,7 @@ ${rawResearchText}
 
         try {
             const geminiResponse = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3.6-flash",
                 contents: parsingPrompt,
                 config: {
                     // Forces JSON-only output

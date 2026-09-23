@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,59 +13,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Plus, Search, TrendingUp, DollarSign, Users, FileText, MoreHorizontal, Edit, Eye, Send } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
-const leads = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    company: "Tech Startup Inc",
-    email: "alice@techstartup.com",
-    phone: "+1 555-0101",
-    status: "new",
-    value: 15000,
-    source: "Website",
-  },
-  {
-    id: "2",
-    name: "Bob Williams",
-    company: "Global Solutions",
-    email: "bob@globalsolutions.com",
-    phone: "+1 555-0102",
-    status: "contacted",
-    value: 25000,
-    source: "Referral",
-  },
-  {
-    id: "3",
-    name: "Carol Martinez",
-    company: "Innovation Labs",
-    email: "carol@innovationlabs.com",
-    phone: "+1 555-0103",
-    status: "qualified",
-    value: 50000,
-    source: "LinkedIn",
-  },
-  {
-    id: "4",
-    name: "David Lee",
-    company: "Enterprise Corp",
-    email: "david@enterprisecorp.com",
-    phone: "+1 555-0104",
-    status: "proposal",
-    value: 75000,
-    source: "Conference",
-  },
-  {
-    id: "5",
-    name: "Emma Davis",
-    company: "Future Systems",
-    email: "emma@futuresystems.com",
-    phone: "+1 555-0105",
-    status: "closed",
-    value: 40000,
-    source: "Website",
-  },
-]
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { LeadForm } from "@/components/forms/lead-form"
+import { InvoiceForm } from "@/components/forms/invoice-form"
+import { toast } from "sonner"
+import { useStore } from "@/lib/store"
 
 const invoices = [
   {
@@ -110,12 +63,17 @@ const pipelineStages = [
 ]
 
 export default function SalesPage() {
+  const { leads, setLeads } = useStore()
   const totalPipelineValue = pipelineStages.reduce((sum, stage) => sum + stage.value, 0)
+  const [leadFormOpen, setLeadFormOpen] = useState(false)
+  const [selectedLead, setSelectedLead] = useState<(typeof leads)[number] | null>(null)
+  const [invoiceFormOpen, setInvoiceFormOpen] = useState(false)
+  const [selectedInvoice, setSelectedInvoice] = useState<(typeof invoices)[number] | null>(null)
 
   return (
     <div className="space-y-6">
       <PageHeader title="Sales" description="Manage your leads, pipeline, and invoices">
-        <Button>
+        <Button onClick={() => setLeadFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Lead
         </Button>
@@ -237,7 +195,7 @@ export default function SalesPage() {
                   {
                     key: "actions",
                     header: "",
-                    cell: () => (
+                    cell: (item) => (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -245,15 +203,15 @@ export default function SalesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedLead(item)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info("Editing leads is coming soon")}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Lead
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => (window.location.href = `mailto:${item.email}`)}>
                             <Send className="mr-2 h-4 w-4" />
                             Send Email
                           </DropdownMenuItem>
@@ -274,7 +232,7 @@ export default function SalesPage() {
                 <CardTitle>Invoices</CardTitle>
                 <CardDescription>Manage billing and payments</CardDescription>
               </div>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setInvoiceFormOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Invoice
               </Button>
@@ -312,7 +270,7 @@ export default function SalesPage() {
                   {
                     key: "actions",
                     header: "",
-                    cell: () => (
+                    cell: (item) => (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -320,15 +278,17 @@ export default function SalesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedInvoice(item)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Invoice
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => toast.success(`Reminder sent to ${item.customerName}`)}
+                          >
                             <Send className="mr-2 h-4 w-4" />
                             Send Reminder
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info("Editing invoices is coming soon")}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
@@ -342,6 +302,126 @@ export default function SalesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <LeadForm
+        open={leadFormOpen}
+        onOpenChange={setLeadFormOpen}
+        onSubmit={(data) => {
+          setLeads((current) => [
+            ...current,
+            {
+              id: crypto.randomUUID(),
+              name: data.name,
+              company: data.company,
+              email: data.email,
+              phone: data.phone,
+              status: "new",
+              value: Number(data.value) || 0,
+              source: data.source || "Other",
+            },
+          ])
+          toast.success("Lead added")
+        }}
+      />
+      <InvoiceForm
+        open={invoiceFormOpen}
+        onOpenChange={setInvoiceFormOpen}
+        onSubmit={() => toast.success("Invoice created")}
+      />
+
+      <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Lead Details</DialogTitle>
+            <DialogDescription>{selectedLead?.company}</DialogDescription>
+          </DialogHeader>
+          {selectedLead && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Name</span>
+                <span className="font-medium">{selectedLead.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Email</span>
+                <span className="font-medium">{selectedLead.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phone</span>
+                <span className="font-medium">{selectedLead.phone}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Source</span>
+                <span className="font-medium">{selectedLead.source}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Value</span>
+                <span className="font-medium">${selectedLead.value.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedLead.status}
+                  variant={
+                    selectedLead.status === "new"
+                      ? "info"
+                      : selectedLead.status === "contacted"
+                        ? "warning"
+                        : selectedLead.status === "qualified"
+                          ? "success"
+                          : selectedLead.status === "proposal"
+                            ? "default"
+                            : "success"
+                  }
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!selectedInvoice} onOpenChange={(open) => !open && setSelectedInvoice(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invoice Details</DialogTitle>
+            <DialogDescription>{selectedInvoice?.id}</DialogDescription>
+          </DialogHeader>
+          {selectedInvoice && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Customer</span>
+                <span className="font-medium">{selectedInvoice.customerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="font-medium">${selectedInvoice.amount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Due Date</span>
+                <span className="font-medium">{selectedInvoice.dueDate}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Created</span>
+                <span className="font-medium">{selectedInvoice.createdAt}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedInvoice.status}
+                  variant={
+                    selectedInvoice.status === "paid"
+                      ? "success"
+                      : selectedInvoice.status === "sent"
+                        ? "info"
+                        : selectedInvoice.status === "overdue"
+                          ? "error"
+                          : "default"
+                  }
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

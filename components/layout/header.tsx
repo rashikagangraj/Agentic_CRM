@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { useStore } from "@/lib/store"
@@ -7,7 +8,6 @@ import { ModeToggle } from "./mode-toggle"
 import { ThemeToggle } from "./theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { BrandMark } from "@/components/ui/brand-mark"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,15 +16,43 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, Search, Settings, LogOut, User } from "lucide-react"
+import { Bell, Search, Settings, LogOut, User, Users, Megaphone } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { businessNavItems, personalNavItems } from "./sidebar"
 
 export function Header() {
-  const { sidebarOpen } = useStore()
+  const { sidebarOpen, mode, leads, contentItems } = useStore()
   const { user, businessProfile, logout } = useAuth()
   const router = useRouter()
+  const [commandOpen, setCommandOpen] = useState(false)
+
+  const navItems = mode === "business" ? businessNavItems : personalNavItems
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault()
+        setCommandOpen((open) => !open)
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
+  const goTo = (href: string) => {
+    setCommandOpen(false)
+    router.push(href)
+  }
 
   const handleLogout = async () => {
     try {
@@ -42,14 +70,13 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 z-30 h-16 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl transition-all duration-300",
+        "fixed top-0 right-0 z-30 h-16 border-b border-slate-200/80 dark:border-slate-800/80 glass-nav transition-all duration-300",
         sidebarOpen ? "left-64" : "left-16",
       )}
     >
       <div className="flex h-full items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-2 pr-3 border-r border-slate-200 dark:border-slate-800">
-            <BrandMark variant="icon" size="sm" />
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
               Agentic <span className="hm-grad font-bold">CRM</span>
             </span>
@@ -59,8 +86,13 @@ export function Header() {
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search leads, campaigns, agents..."
-              className="w-72 pl-9 h-9 rounded-full bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/80 text-sm focus-visible:ring-2 focus-visible:ring-primary/20"
+              readOnly
+              onClick={() => setCommandOpen(true)}
+              className="w-72 pl-9 h-9 rounded-full bg-slate-100/80 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/80 text-sm focus-visible:ring-2 focus-visible:ring-primary/20 cursor-pointer"
             />
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 border border-slate-300 dark:border-slate-600 rounded px-1.5 py-0.5">
+              ⌘K
+            </kbd>
           </div>
         </div>
 
@@ -110,6 +142,55 @@ export function Header() {
           </DropdownMenu>
         </div>
       </div>
+
+      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
+        <CommandInput placeholder="Search leads, campaigns, agents..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Leads">
+            {leads.map((lead) => (
+              <CommandItem
+                key={lead.id}
+                value={`${lead.name} ${lead.company} ${lead.email}`}
+                onSelect={() => goTo("/dashboard/sales")}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                {lead.name} — {lead.company}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading="Campaigns">
+            {contentItems.map((item) => (
+              <CommandItem
+                key={item.id}
+                value={`${item.title} ${item.content}`}
+                onSelect={() => goTo("/dashboard/marketing")}
+              >
+                <Megaphone className="mr-2 h-4 w-4" />
+                {item.title}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading="Agents">
+            <CommandItem value="AI Deep Research Agent" onSelect={() => goTo("/dashboard/marketing")}>
+              <Search className="mr-2 h-4 w-4" />
+              AI Deep Research Agent
+            </CommandItem>
+            <CommandItem value="AI Content Generator Agent" onSelect={() => goTo("/dashboard/marketing")}>
+              <Search className="mr-2 h-4 w-4" />
+              AI Content Generator Agent
+            </CommandItem>
+          </CommandGroup>
+          <CommandGroup heading="Pages">
+            {navItems.map((item) => (
+              <CommandItem key={item.href} value={item.title} onSelect={() => goTo(item.href)}>
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.title}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
     </header>
   )
 }

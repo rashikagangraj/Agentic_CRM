@@ -1,0 +1,108 @@
+# ─────────────────────────────────────────────────────────────────────────
+# aiKart Agent Manifest — Agentic CRM
+#
+# Powers the "Try Me Now" interactive sandbox on aiKart.
+# Allows buyers to evaluate market research and marketing content generation
+# live directly from the listing.
+# ─────────────────────────────────────────────────────────────────────────
+
+apiVersion: aikart.dev/v1
+kind: AgentManifest
+
+metadata:
+  name: agentic-crm
+  displayName: "Agentic CRM"
+  description: "AI-driven CRM that researches markets, analyzes competitors, and generates actionable sales and marketing insights."
+
+runtime:
+  type: docker
+  # Publicly pullable Docker image
+  image: "rashikag/agentic-crm:1.1.0"
+  # Dispatcher command that boots the internal runner against the standalone Next.js server
+  command: ["node", "aikart/entrypoint.mjs", "aikart-run"]
+
+resources:
+  cpu: 0.25             # vCPUs (max 2)
+  memoryMb: 512         # Memory in MB (max 4096)
+  timeoutSeconds: 120   # Execution timeout limit (max 280)
+
+# Form fields shown to buyers in Batch Mode and mapped to AIKART_INPUT
+inputs:
+  - name: workflow
+    label: "What should the agent do?"
+    type: select
+    required: true
+    options: ["research", "generate"]
+    default: "research"
+
+  - name: businessName
+    label: "Business name"
+    type: text
+    required: true
+
+  - name: niche
+    label: "Business niche"
+    type: text
+    required: true
+
+  - name: category
+    label: "Business category"
+    type: text
+    required: true
+
+  - name: city
+    label: "City (used by: research)"
+    type: text
+    required: false
+
+  - name: marketingGoal
+    label: "Marketing goal (used by: research)"
+    type: text
+    required: false
+
+  - name: budget
+    label: "Marketing budget (used by: research)"
+    type: text
+    required: false
+
+  - name: channels
+    label: "Marketing channels, comma-separated (used by: research)"
+    type: text
+    required: false
+
+  - name: topic
+    label: "Content topic (used by: generate)"
+    type: text
+    required: false
+
+  - name: tone
+    label: "Content tone (used by: generate)"
+    type: select
+    required: false
+    options: ["professional", "friendly", "urgent", "casual"]
+    default: "professional"
+
+  - name: contentFormat
+    label: "Content format, e.g. social post, blog intro, email (used by: generate)"
+    type: text
+    required: false
+
+  - name: targetAudience
+    label: "Target audience (used by: generate)"
+    type: text
+    required: false
+
+# API keys and environment variables injected securely into the sandbox container
+secrets:
+  - name: GEMINI_API_KEY
+    description: "Google Gemini API key — used for autonomous market research, competitor analysis, and marketing content generation."
+    required: true
+
+output:
+  # Render format on the aiKart listing page
+  format: markdown
+
+security:
+  networkEgress: allowlist
+  egressAllowlist:
+    - "generativelanguage.googleapis.com"

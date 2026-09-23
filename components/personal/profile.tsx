@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Mail, Phone, MapPin, Calendar, Upload, Edit, Bell, Shield, Heart } from "lucide-react"
+import { toast } from "sonner"
 
 const preferences = [
   { id: "1", category: "Technology", enabled: true },
@@ -20,10 +22,23 @@ const preferences = [
 ]
 
 export function PersonalProfile() {
+  const [activeTab, setActiveTab] = useState("personal")
+  const [formData, setFormData] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    phone: "+1 (555) 987-6543",
+    address: "456 Park Avenue, Apt 12B, New York, NY 10022",
+  })
+
+  const handleSave = () => {
+    toast.success("Profile updated")
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Personal Profile" description="Manage your personal information and preferences">
-        <Button>
+        <Button onClick={() => setActiveTab("personal")}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Profile
         </Button>
@@ -37,7 +52,9 @@ export function PersonalProfile() {
                 <AvatarImage src="/user-avatar.png" />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
-              <h3 className="text-xl font-semibold">John Doe</h3>
+              <h3 className="text-xl font-semibold">
+                {formData.firstName} {formData.lastName}
+              </h3>
               <p className="text-sm text-muted-foreground">ID: USR-2024-001</p>
               <Badge className="mt-2" variant="secondary">
                 Premium Member
@@ -51,11 +68,11 @@ export function PersonalProfile() {
             <div className="mt-6 space-y-4">
               <div className="flex items-center gap-3 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>john.doe@example.com</span>
+                <span>{formData.email}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>+1 (555) 987-6543</span>
+                <span>{formData.phone}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -70,7 +87,7 @@ export function PersonalProfile() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <Tabs defaultValue="personal" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <CardHeader>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="personal">Personal Info</TabsTrigger>
@@ -83,26 +100,47 @@ export function PersonalProfile() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" defaultValue="John" />
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" defaultValue="Doe" />
+                    <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" defaultValue="+1 (555) 987-6543" />
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="address">Address</Label>
-                    <Input id="address" defaultValue="456 Park Avenue, Apt 12B, New York, NY 10022" />
+                    <Input
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    />
                   </div>
                 </div>
-                <Button>Save Changes</Button>
+                <Button onClick={handleSave}>Save Changes</Button>
               </TabsContent>
 
               <TabsContent value="preferences" className="space-y-4">

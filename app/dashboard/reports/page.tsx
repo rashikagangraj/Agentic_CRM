@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -56,7 +57,21 @@ const walletSummary = {
   pendingPayments: 45000,
 }
 
+function exportReport() {
+  const rows = ["Month,Revenue", ...salesData.map((d) => `${d.month},${d.revenue}`)]
+  const blob = new Blob([rows.join("\n")], { type: "text/csv" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = "revenue-report.csv"
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
 export default function ReportsPage() {
+  const router = useRouter()
   return (
     <div className="space-y-6">
       <PageHeader title="Reports & Analytics" description="Comprehensive analytics of all business activities">
@@ -72,7 +87,7 @@ export default function ReportsPage() {
               <SelectItem value="year">Year 2025</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button variant="outline" onClick={exportReport}>
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
@@ -315,7 +330,9 @@ export default function ReportsPage() {
                   <div className="text-center">
                     <p className="text-4xl font-bold">${(walletSummary.pendingPayments / 1000).toFixed(0)}K</p>
                     <p className="text-muted-foreground mt-2">Awaiting collection</p>
-                    <Button className="mt-4">View Details</Button>
+                    <Button className="mt-4" onClick={() => router.push("/dashboard/sales")}>
+                      View Details
+                    </Button>
                   </div>
                 </div>
               </CardContent>

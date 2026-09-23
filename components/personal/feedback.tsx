@@ -14,11 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Star, MessageSquare, ThumbsUp, Plus, Building2 } from "lucide-react"
+import { toast } from "sonner"
 
-const pendingReviews = [
+const initialPendingReviews = [
   {
     id: "1",
     service: "Web Development Project",
@@ -29,7 +31,7 @@ const pendingReviews = [
   { id: "2", service: "Spa Treatment", business: "Wellness Center", date: "Dec 3, 2025", type: "service" },
 ]
 
-const submittedReviews = [
+const initialSubmittedReviews = [
   {
     id: "1",
     service: "Consulting Session",
@@ -61,8 +63,40 @@ const submittedReviews = [
  * Allows rating services and writing reviews.
  */
 export function PersonalFeedback() {
-  const [selectedRating, setSelectedRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
+  const [pendingReviews, setPendingReviews] = useState(initialPendingReviews)
+  const [submittedReviews, setSubmittedReviews] = useState(initialSubmittedReviews)
+
+  const [appRating, setAppRating] = useState(0)
+  const [appHoverRating, setAppHoverRating] = useState(0)
+  const [appFeedbackText, setAppFeedbackText] = useState("")
+
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewHoverRating, setReviewHoverRating] = useState(0)
+  const [reviewComment, setReviewComment] = useState("")
+
+  const submitAppFeedback = () => {
+    toast.success("Thanks for your feedback!")
+    setAppRating(0)
+    setAppFeedbackText("")
+  }
+
+  const submitReview = (review: (typeof initialPendingReviews)[number]) => {
+    setPendingReviews((current) => current.filter((r) => r.id !== review.id))
+    setSubmittedReviews((current) => [
+      {
+        id: review.id,
+        service: review.service,
+        business: review.business,
+        date: review.date,
+        rating: reviewRating || 5,
+        comment: reviewComment,
+      },
+      ...current,
+    ])
+    toast.success("Review submitted")
+    setReviewRating(0)
+    setReviewComment("")
+  }
 
   return (
     <div className="space-y-6">
@@ -87,13 +121,13 @@ export function PersonalFeedback() {
                     <button
                       key={star}
                       type="button"
-                      onClick={() => setSelectedRating(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setAppRating(star)}
+                      onMouseEnter={() => setAppHoverRating(star)}
+                      onMouseLeave={() => setAppHoverRating(0)}
                       className="p-1"
                     >
                       <Star
-                        className={`h-8 w-8 ${star <= (hoverRating || selectedRating)
+                        className={`h-8 w-8 ${star <= (appHoverRating || appRating)
                             ? "fill-yellow-500 text-yellow-500"
                             : "text-muted-foreground/30"
                           }`}
@@ -104,11 +138,19 @@ export function PersonalFeedback() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="feedback">Your Feedback</Label>
-                <Textarea id="feedback" placeholder="Tell us what you think..." rows={4} />
+                <Textarea
+                  id="feedback"
+                  placeholder="Tell us what you think..."
+                  rows={4}
+                  value={appFeedbackText}
+                  onChange={(e) => setAppFeedbackText(e.target.value)}
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button>Submit Feedback</Button>
+              <DialogClose asChild>
+                <Button onClick={submitAppFeedback}>Submit Feedback</Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -193,13 +235,13 @@ export function PersonalFeedback() {
                                     <button
                                       key={star}
                                       type="button"
-                                      onClick={() => setSelectedRating(star)}
-                                      onMouseEnter={() => setHoverRating(star)}
-                                      onMouseLeave={() => setHoverRating(0)}
+                                      onClick={() => setReviewRating(star)}
+                                      onMouseEnter={() => setReviewHoverRating(star)}
+                                      onMouseLeave={() => setReviewHoverRating(0)}
                                       className="p-1"
                                     >
                                       <Star
-                                        className={`h-8 w-8 ${star <= (hoverRating || selectedRating)
+                                        className={`h-8 w-8 ${star <= (reviewHoverRating || reviewRating)
                                             ? "fill-yellow-500 text-yellow-500"
                                             : "text-muted-foreground/30"
                                           }`}
@@ -210,11 +252,19 @@ export function PersonalFeedback() {
                               </div>
                               <div className="space-y-2">
                                 <Label htmlFor="comment">Your Review</Label>
-                                <Textarea id="comment" placeholder="Tell us about your experience..." rows={4} />
+                                <Textarea
+                                  id="comment"
+                                  placeholder="Tell us about your experience..."
+                                  rows={4}
+                                  value={reviewComment}
+                                  onChange={(e) => setReviewComment(e.target.value)}
+                                />
                               </div>
                             </div>
                             <DialogFooter>
-                              <Button>Submit Review</Button>
+                              <DialogClose asChild>
+                                <Button onClick={() => submitReview(review)}>Submit Review</Button>
+                              </DialogClose>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>

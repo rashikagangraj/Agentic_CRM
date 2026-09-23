@@ -91,6 +91,22 @@ import { useState } from "react"
 
 export function BusinessSupport() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [customerTicketList, setCustomerTicketList] = useState(customerTickets)
+  const [selectedCustomerTicket, setSelectedCustomerTicket] = useState<(typeof customerTickets)[number] | null>(null)
+  const [selectedAdminTicket, setSelectedAdminTicket] = useState<(typeof adminTickets)[number] | null>(null)
+  const [replyingTo, setReplyingTo] = useState<(typeof customerTickets)[number] | null>(null)
+  const [replyText, setReplyText] = useState("")
+
+  const markResolved = (id: string) => {
+    setCustomerTicketList((current) => current.map((t) => (t.id === id ? { ...t, status: "resolved" } : t)))
+    toast.success("Ticket marked as resolved")
+  }
+
+  const sendReply = () => {
+    toast.success("Reply sent")
+    setReplyText("")
+    setReplyingTo(null)
+  }
 
   const {
     register,
@@ -208,7 +224,7 @@ export function BusinessSupport() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {customerTickets.map((ticket) => (
+                {customerTicketList.map((ticket) => (
                   <div
                     key={ticket.id}
                     className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
@@ -260,12 +276,18 @@ export function BusinessSupport() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedCustomerTicket(ticket)}>
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setReplyingTo(ticket)}>
                             <Send className="mr-2 h-4 w-4" />
                             Reply
                           </DropdownMenuItem>
-                          <DropdownMenuItem>Mark as Resolved</DropdownMenuItem>
+                          {ticket.status !== "resolved" && (
+                            <DropdownMenuItem onClick={() => markResolved(ticket.id)}>
+                              Mark as Resolved
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -319,7 +341,7 @@ export function BusinessSupport() {
                         />
                         <p className="text-xs text-muted-foreground mt-1">{ticket.createdAt}</p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => setSelectedAdminTicket(ticket)}>
                         View
                       </Button>
                     </div>
@@ -330,6 +352,87 @@ export function BusinessSupport() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog
+        open={!!selectedCustomerTicket}
+        onOpenChange={(open) => !open && setSelectedCustomerTicket(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedCustomerTicket?.subject}</DialogTitle>
+            <DialogDescription>{selectedCustomerTicket?.id}</DialogDescription>
+          </DialogHeader>
+          {selectedCustomerTicket && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Customer</span>
+                <span className="font-medium">{selectedCustomerTicket.customer}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Priority</span>
+                <span className="font-medium capitalize">{selectedCustomerTicket.priority}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedCustomerTicket.status.replace("-", " ")}
+                  variant={
+                    selectedCustomerTicket.status === "resolved"
+                      ? "success"
+                      : selectedCustomerTicket.status === "in-progress"
+                        ? "warning"
+                        : "info"
+                  }
+                />
+              </div>
+              <p className="text-muted-foreground pt-2">{selectedCustomerTicket.description}</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!replyingTo} onOpenChange={(open) => !open && setReplyingTo(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reply to {replyingTo?.customer}</DialogTitle>
+            <DialogDescription>{replyingTo?.subject}</DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Write your reply..."
+            rows={4}
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+          />
+          <DialogFooter>
+            <Button onClick={sendReply}>Send Reply</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!selectedAdminTicket} onOpenChange={(open) => !open && setSelectedAdminTicket(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedAdminTicket?.subject}</DialogTitle>
+            <DialogDescription>{selectedAdminTicket?.id}</DialogDescription>
+          </DialogHeader>
+          {selectedAdminTicket && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Priority</span>
+                <span className="font-medium capitalize">{selectedAdminTicket.priority}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedAdminTicket.status.replace("-", " ")}
+                  variant={selectedAdminTicket.status === "open" ? "info" : "warning"}
+                />
+              </div>
+              <p className="text-muted-foreground pt-2">{selectedAdminTicket.description}</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

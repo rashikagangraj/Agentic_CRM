@@ -1,0 +1,99 @@
+apiVersion: aikart.dev/v1
+kind: AgentManifest
+
+metadata:
+  name: agentic-crm
+  displayName: "Agentic CRM"
+  description: "AI-driven CRM that researches markets, analyzes competitors, and generates actionable sales and marketing insights"
+
+runtime:
+  type: docker
+  image: "rashikag/agentic-crm:1.1.0"
+  # The image's default CMD serves the full Next.js web app (for normal
+  # deployment). aiKart invokes it as a one-shot job instead, so override
+  # the command to run the aiKart runner mode.
+  command: ["node", "aikart/entrypoint.mjs", "aikart-run"]
+
+resources:
+  cpu: 0.25
+  memoryMb: 512
+  timeoutSeconds: 120
+
+inputs:
+  - name: workflow
+    label: "What should the agent do?"
+    type: select
+    required: true
+    options: ["research", "generate"]
+    default: "research"
+
+  - name: businessName
+    label: "Business name"
+    type: text
+    required: true
+
+  - name: niche
+    label: "Business niche"
+    type: text
+    required: true
+
+  - name: category
+    label: "Business category"
+    type: text
+    required: true
+
+  - name: city
+    label: "City (used by: research)"
+    type: text
+    required: false
+
+  - name: marketingGoal
+    label: "Marketing goal (used by: research)"
+    type: text
+    required: false
+
+  - name: budget
+    label: "Marketing budget (used by: research)"
+    type: text
+    required: false
+
+  - name: channels
+    label: "Marketing channels, comma-separated (used by: research)"
+    type: text
+    required: false
+
+  - name: topic
+    label: "Content topic (used by: generate)"
+    type: text
+    required: false
+
+  - name: tone
+    label: "Content tone (used by: generate)"
+    type: select
+    required: false
+    options: ["professional", "friendly", "urgent", "casual"]
+    default: "professional"
+
+  - name: contentFormat
+    label: "Content format, e.g. social post, blog intro (used by: generate)"
+    type: text
+    required: false
+
+  - name: targetAudience
+    label: "Target audience (used by: generate)"
+    type: text
+    required: false
+
+secrets:
+  - name: GEMINI_API_KEY
+    description: "Google Gemini API key — used for autonomous market research, competitor analysis, and marketing content generation."
+    required: true
+
+output:
+  format: markdown
+
+security:
+  networkEgress: allowlist
+  egressAllowlist:
+    - generativelanguage.googleapis.com
+

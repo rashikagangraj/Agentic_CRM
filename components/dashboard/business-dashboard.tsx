@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { StatCard } from "@/components/ui/stat-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +9,10 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { DollarSign, Users, TrendingUp, Package, ArrowRight, Plus, Calendar, Clock } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import { LeadForm } from "@/components/forms/lead-form"
+import { InvoiceForm } from "@/components/forms/invoice-form"
+import { ServiceForm } from "@/components/forms/service-form"
+import { toast } from "sonner"
 
 const recentLeads = [
   { id: "1", name: "Alice Johnson", email: "alice@example.com", status: "new", value: 5000 },
@@ -30,6 +35,7 @@ const topServices = [
 ]
 
 import { useAuth } from "@/lib/auth-context"
+import { useStore } from "@/lib/store"
 
 /**
  * Main dashboard view for business accounts.
@@ -39,6 +45,10 @@ import { useAuth } from "@/lib/auth-context"
  */
 export function BusinessDashboard() {
   const { businessProfile } = useAuth()
+  const { setLeads } = useStore()
+  const [leadFormOpen, setLeadFormOpen] = useState(false)
+  const [invoiceFormOpen, setInvoiceFormOpen] = useState(false)
+  const [serviceFormOpen, setServiceFormOpen] = useState(false)
 
   return (
     <div className="space-y-6">
@@ -46,7 +56,7 @@ export function BusinessDashboard() {
         title="Business Dashboard"
         description={`Welcome back${businessProfile?.ownerName ? `, ${businessProfile.ownerName}` : ""}! Here's an overview of your business performance.`}
       >
-        <Button>
+        <Button onClick={() => setLeadFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Lead
         </Button>
@@ -192,25 +202,68 @@ export function BusinessDashboard() {
             <CardDescription>Common tasks</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start bg-transparent">
+            <Button variant="outline" className="justify-start bg-transparent" onClick={() => setLeadFormOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add New Lead
             </Button>
-            <Button variant="outline" className="justify-start bg-transparent">
+            <Button
+              variant="outline"
+              className="justify-start bg-transparent"
+              onClick={() => toast.info("Meeting scheduling is coming soon")}
+            >
               <Calendar className="mr-2 h-4 w-4" />
               Schedule Meeting
             </Button>
-            <Button variant="outline" className="justify-start bg-transparent">
+            <Button
+              variant="outline"
+              className="justify-start bg-transparent"
+              onClick={() => setInvoiceFormOpen(true)}
+            >
               <DollarSign className="mr-2 h-4 w-4" />
               Create Invoice
             </Button>
-            <Button variant="outline" className="justify-start bg-transparent">
+            <Button
+              variant="outline"
+              className="justify-start bg-transparent"
+              onClick={() => setServiceFormOpen(true)}
+            >
               <Package className="mr-2 h-4 w-4" />
               Add Service
             </Button>
           </CardContent>
         </Card>
       </div>
+
+      <LeadForm
+        open={leadFormOpen}
+        onOpenChange={setLeadFormOpen}
+        onSubmit={(data) => {
+          setLeads((current) => [
+            ...current,
+            {
+              id: crypto.randomUUID(),
+              name: data.name,
+              company: data.company,
+              email: data.email,
+              phone: data.phone,
+              status: "new",
+              value: Number(data.value) || 0,
+              source: data.source || "Other",
+            },
+          ])
+          toast.success("Lead added")
+        }}
+      />
+      <InvoiceForm
+        open={invoiceFormOpen}
+        onOpenChange={setInvoiceFormOpen}
+        onSubmit={() => toast.success("Invoice created")}
+      />
+      <ServiceForm
+        open={serviceFormOpen}
+        onOpenChange={setServiceFormOpen}
+        onSubmit={() => toast.success("Service added")}
+      />
     </div>
   )
 }

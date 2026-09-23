@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,8 @@ import { StatCard } from "@/components/ui/stat-card"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { Search, ShoppingBag, Calendar, Ticket, MoreHorizontal, Eye, Download, MapPin, Clock } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { toast } from "sonner"
 
 const purchases = [
   {
@@ -99,7 +102,30 @@ const events = [
   },
 ]
 
+function downloadReceipt(purchase: (typeof purchases)[number]) {
+  const receiptText = `RECEIPT
+Order ID: ${purchase.id}
+Item: ${purchase.item}
+Vendor: ${purchase.vendor}
+Amount: $${purchase.amount}
+Date: ${purchase.date}
+Status: ${purchase.status}
+`
+  const blob = new Blob([receiptText], { type: "text/plain" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = `receipt-${purchase.id}.txt`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+  toast.success("Receipt downloaded")
+}
+
 export default function ActivitiesPage() {
+  const [selectedPurchase, setSelectedPurchase] = useState<(typeof purchases)[number] | null>(null)
+
   return (
     <div className="space-y-6">
       <PageHeader title="Activities" description="Track your purchases, bookings, and events" />
@@ -171,11 +197,11 @@ export default function ActivitiesPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedPurchase(purchase)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => downloadReceipt(purchase)}>
                             <Download className="mr-2 h-4 w-4" />
                             Download Receipt
                           </DropdownMenuItem>
@@ -282,6 +308,42 @@ export default function ActivitiesPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!selectedPurchase} onOpenChange={(open) => !open && setSelectedPurchase(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Purchase Details</DialogTitle>
+            <DialogDescription>{selectedPurchase?.id}</DialogDescription>
+          </DialogHeader>
+          {selectedPurchase && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Item</span>
+                <span className="font-medium">{selectedPurchase.item}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Vendor</span>
+                <span className="font-medium">{selectedPurchase.vendor}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="font-medium">${selectedPurchase.amount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Date</span>
+                <span className="font-medium">{selectedPurchase.date}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedPurchase.status}
+                  variant={selectedPurchase.status === "completed" ? "success" : "warning"}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

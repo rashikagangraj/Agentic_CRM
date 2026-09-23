@@ -18,8 +18,8 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }

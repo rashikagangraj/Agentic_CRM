@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { toast } from "sonner"
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -74,6 +77,8 @@ const faqItems = [
 ]
 
 export function PersonalSupport() {
+  const [selectedTicket, setSelectedTicket] = useState<(typeof myTickets)[number] | null>(null)
+
   return (
     <div className="space-y-6">
       <PageHeader title="Support" description="Get help and contact support">
@@ -115,7 +120,9 @@ export function PersonalSupport() {
               </div>
             </div>
             <DialogFooter>
-              <Button>Submit Ticket</Button>
+              <DialogClose asChild>
+                <Button onClick={() => toast.success("Ticket submitted")}>Submit Ticket</Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -154,7 +161,7 @@ export function PersonalSupport() {
                       </div>
                       <div className="mt-3 flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Created: {ticket.createdAt}</span>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => setSelectedTicket(ticket)}>
                           View Details
                         </Button>
                       </div>
@@ -240,6 +247,38 @@ export function PersonalSupport() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedTicket?.subject}</DialogTitle>
+            <DialogDescription>{selectedTicket?.id}</DialogDescription>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge
+                  status={selectedTicket.status.replace("-", " ")}
+                  variant={selectedTicket.status === "resolved" ? "success" : "warning"}
+                />
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Priority</span>
+                <span className="font-medium capitalize">{selectedTicket.priority}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Created</span>
+                <span className="font-medium">{selectedTicket.createdAt}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Last Update</span>
+                <span className="font-medium">{selectedTicket.lastUpdate}</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -185,74 +185,74 @@ export default function SignupPage() {
             {/* Step 1: Account Details */}
             {currentStep === 1 && (
                 <form onSubmit={accountForm.handleSubmit(handleAccountNext)}>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 px-6">
                         <div className="space-y-2">
-                            <Label htmlFor="ownerName" className="text-slate-200">Your Name</Label>
+                            <Label htmlFor="ownerName" className="text-slate-700 dark:text-slate-200 font-medium">Your Name</Label>
                             <Input
                                 id="ownerName"
                                 placeholder="John Doe"
-                                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 {...accountForm.register('ownerName')}
                             />
                             {accountForm.formState.errors.ownerName && (
-                                <p className="text-sm text-red-400">{accountForm.formState.errors.ownerName.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{accountForm.formState.errors.ownerName.message}</p>
                             )}
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-slate-200">Email</Label>
+                            <Label htmlFor="email" className="text-slate-700 dark:text-slate-200 font-medium">Email</Label>
                             <Input
                                 id="email"
                                 type="email"
                                 placeholder="you@business.com"
-                                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 {...accountForm.register('email')}
                             />
                             {accountForm.formState.errors.email && (
-                                <p className="text-sm text-red-400">{accountForm.formState.errors.email.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{accountForm.formState.errors.email.message}</p>
                             )}
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-slate-200">Password</Label>
+                            <Label htmlFor="password" className="text-slate-700 dark:text-slate-200 font-medium">Password</Label>
                             <Input
                                 id="password"
                                 type="password"
                                 placeholder="••••••••"
-                                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 {...accountForm.register('password')}
                             />
                             {accountForm.formState.errors.password && (
-                                <p className="text-sm text-red-400">{accountForm.formState.errors.password.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{accountForm.formState.errors.password.message}</p>
                             )}
                         </div>
 
                         <div className="space-y-2 mb-6">
-                            <Label htmlFor="confirmPassword" className="text-slate-200">Confirm Password</Label>
+                            <Label htmlFor="confirmPassword" className="text-slate-700 dark:text-slate-200 font-medium">Confirm Password</Label>
                             <Input
                                 id="confirmPassword"
                                 type="password"
                                 placeholder="••••••••"
-                                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 {...accountForm.register('confirmPassword')}
                             />
                             {accountForm.formState.errors.confirmPassword && (
-                                <p className="text-sm text-red-400">{accountForm.formState.errors.confirmPassword.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{accountForm.formState.errors.confirmPassword.message}</p>
                             )}
                         </div>
                     </CardContent>
 
-                    <CardFooter className="flex flex-col space-y-4">
+                    <CardFooter className="flex flex-col space-y-4 px-6 pb-8">
                         <Button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-6"
+                            className="w-full h-11 rounded-full bg-primary hover:bg-blue-600 text-white font-semibold shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02]"
                         >
                             Continue <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
 
-                        <div className="text-center text-sm text-slate-400">
+                        <div className="text-center text-sm text-slate-500 dark:text-slate-400">
                             Already have an account?{' '}
-                            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-semibold">
+                            <Link href="/login" className="text-primary hover:underline font-semibold">
                                 Sign in
                             </Link>
                         </div>
@@ -263,140 +263,140 @@ export default function SignupPage() {
             {/* Step 2: Business Details */}
             {currentStep === 2 && (
                 <form onSubmit={businessForm.handleSubmit(handleBusinessNext)}>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 px-6">
                         <div className="space-y-2">
-                            <Label htmlFor="businessName" className="text-slate-200 flex items-center gap-2">
-                                <Building2 className="w-4 h-4" /> Business Name
+                            <Label htmlFor="businessName" className="text-slate-700 dark:text-slate-200 font-medium flex items-center gap-2">
+                                <Building2 className="w-4 h-4 text-primary" /> Business Name
                             </Label>
                             <Input
                                 id="businessName"
                                 placeholder="Acme Corp"
-                                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 {...businessForm.register('businessName')}
                             />
                             {businessForm.formState.errors.businessName && (
-                                <p className="text-sm text-red-400">{businessForm.formState.errors.businessName.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.businessName.message}</p>
                             )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2 space-y-2">
-                                <Label htmlFor="street" className="text-slate-200 flex items-center gap-2">
-                                    <MapPin className="w-4 h-4" /> Street Address
+                                <Label htmlFor="street" className="text-slate-700 dark:text-slate-200 font-medium flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-primary" /> Street Address
                                 </Label>
                                 <Input
                                     id="street"
                                     placeholder="123 Main St"
-                                    className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                    className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     {...businessForm.register('street')}
                                 />
                                 {businessForm.formState.errors.street && (
-                                    <p className="text-sm text-red-400">{businessForm.formState.errors.street.message}</p>
+                                    <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.street.message}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="city" className="text-slate-200">City</Label>
+                                <Label htmlFor="city" className="text-slate-700 dark:text-slate-200 font-medium">City</Label>
                                 <Input
                                     id="city"
                                     placeholder="New York"
-                                    className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                    className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     {...businessForm.register('city')}
                                 />
                                 {businessForm.formState.errors.city && (
-                                    <p className="text-sm text-red-400">{businessForm.formState.errors.city.message}</p>
+                                    <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.city.message}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="state" className="text-slate-200">State</Label>
+                                <Label htmlFor="state" className="text-slate-700 dark:text-slate-200 font-medium">State</Label>
                                 <Input
                                     id="state"
                                     placeholder="NY"
-                                    className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                    className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     {...businessForm.register('state')}
                                 />
                                 {businessForm.formState.errors.state && (
-                                    <p className="text-sm text-red-400">{businessForm.formState.errors.state.message}</p>
+                                    <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.state.message}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="zipCode" className="text-slate-200">ZIP Code</Label>
+                                <Label htmlFor="zipCode" className="text-slate-700 dark:text-slate-200 font-medium">ZIP Code</Label>
                                 <Input
                                     id="zipCode"
                                     placeholder="10001"
-                                    className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                    className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     {...businessForm.register('zipCode')}
                                 />
                                 {businessForm.formState.errors.zipCode && (
-                                    <p className="text-sm text-red-400">{businessForm.formState.errors.zipCode.message}</p>
+                                    <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.zipCode.message}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="country" className="text-slate-200">Country</Label>
+                                <Label htmlFor="country" className="text-slate-700 dark:text-slate-200 font-medium">Country</Label>
                                 <Input
                                     id="country"
                                     placeholder="USA"
-                                    className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                    className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     {...businessForm.register('country')}
                                 />
                                 {businessForm.formState.errors.country && (
-                                    <p className="text-sm text-red-400">{businessForm.formState.errors.country.message}</p>
+                                    <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.country.message}</p>
                                 )}
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="category" className="text-slate-200">Business Category</Label>
+                            <Label htmlFor="category" className="text-slate-700 dark:text-slate-200 font-medium">Business Category</Label>
                             <Select
                                 onValueChange={(value) => businessForm.setValue('category', value as BusinessCategory)}
                                 defaultValue={businessData?.category}
                             >
-                                <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white">
+                                <SelectTrigger className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl">
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-600">
+                                <SelectContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
                                     {BUSINESS_CATEGORIES.map((cat) => (
-                                        <SelectItem key={cat.value} value={cat.value} className="text-white">
+                                        <SelectItem key={cat.value} value={cat.value} className="text-slate-900 dark:text-white">
                                             {cat.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {businessForm.formState.errors.category && (
-                                <p className="text-sm text-red-400">{businessForm.formState.errors.category.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.category.message}</p>
                             )}
                         </div>
 
                         <div className="space-y-2 mb-6">
-                            <Label htmlFor="niche" className="text-slate-200">Business Niche</Label>
+                            <Label htmlFor="niche" className="text-slate-700 dark:text-slate-200 font-medium">Business Niche</Label>
                             <Input
                                 id="niche"
                                 placeholder="e.g., Organic skincare products"
-                                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-500"
+                                className="bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                                 {...businessForm.register('niche')}
                             />
                             <p className="text-xs text-slate-500">Describe what makes your business unique</p>
                             {businessForm.formState.errors.niche && (
-                                <p className="text-sm text-red-400">{businessForm.formState.errors.niche.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{businessForm.formState.errors.niche.message}</p>
                             )}
                         </div>
                     </CardContent>
 
-                    <CardFooter className="flex gap-4">
+                    <CardFooter className="flex gap-3 px-6 pb-8">
                         <Button
                             type="button"
                             variant="outline"
-                            className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                            className="flex-1 h-11 rounded-full border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100"
                             onClick={() => setCurrentStep(1)}
                         >
                             <ArrowLeft className="mr-2 h-4 w-4" /> Back
                         </Button>
                         <Button
                             type="submit"
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+                            className="flex-1 h-11 rounded-full bg-primary hover:bg-blue-600 text-white font-semibold shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02]"
                         >
                             Continue <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -407,22 +407,22 @@ export default function SignupPage() {
             {/* Step 3: Best Sellers */}
             {currentStep === 3 && (
                 <>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center gap-2 text-slate-200 mb-4">
-                            <Package className="w-5 h-5" />
-                            <span className="font-semibold">Best Selling Products</span>
+                    <CardContent className="space-y-4 px-6">
+                        <div className="flex items-center gap-2 text-slate-900 dark:text-white font-semibold mb-2">
+                            <Package className="w-5 h-5 text-primary" />
+                            <span>Best Selling Products</span>
                         </div>
 
                         {bestSellers.map((seller, index) => (
-                            <div key={index} className="p-4 rounded-lg bg-slate-800/30 border border-slate-700 space-y-3">
+                            <div key={index} className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-slate-300">Product #{index + 1}</Label>
+                                    <Label className="text-slate-700 dark:text-slate-300 font-medium">Product #{index + 1}</Label>
                                     {bestSellers.length > 1 && (
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            className="text-red-400 hover:text-red-300"
+                                            className="text-red-500 hover:text-red-600 h-7 px-2 rounded-full"
                                             onClick={() => removeBestSeller(index)}
                                         >
                                             Remove
@@ -438,7 +438,7 @@ export default function SignupPage() {
                                         updated[index].productName = e.target.value;
                                         setBestSellers(updated);
                                     }}
-                                    className="bg-slate-800/50 border-slate-600 text-white"
+                                    className="bg-white/90 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400"
                                 />
 
                                 <Input
@@ -449,7 +449,7 @@ export default function SignupPage() {
                                         updated[index].description = e.target.value;
                                         setBestSellers(updated);
                                     }}
-                                    className="bg-slate-800/50 border-slate-600 text-white"
+                                    className="bg-white/90 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400"
                                 />
 
                                 <Input
@@ -461,7 +461,7 @@ export default function SignupPage() {
                                         updated[index].averagePrice = parseFloat(e.target.value) || 0;
                                         setBestSellers(updated);
                                     }}
-                                    className="bg-slate-800/50 border-slate-600 text-white"
+                                    className="bg-white/90 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl placeholder:text-slate-400"
                                 />
                             </div>
                         ))}
@@ -469,18 +469,18 @@ export default function SignupPage() {
                         <Button
                             type="button"
                             variant="outline"
-                            className="w-full border-slate-600 text-slate-300 hover:bg-slate-800 mb-6"
+                            className="w-full h-10 rounded-full border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100"
                             onClick={addBestSeller}
                         >
                             + Add Another Product
                         </Button>
                     </CardContent>
 
-                    <CardFooter className="flex gap-4">
+                    <CardFooter className="flex gap-3 px-6 pb-8">
                         <Button
                             type="button"
                             variant="outline"
-                            className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                            className="flex-1 h-11 rounded-full border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100"
                             onClick={() => setCurrentStep(2)}
                             disabled={isLoading}
                         >
@@ -488,7 +488,7 @@ export default function SignupPage() {
                         </Button>
                         <Button
                             type="button"
-                            className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold"
+                            className="flex-1 h-11 rounded-full bg-primary hover:bg-blue-600 text-white font-semibold shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02]"
                             onClick={handleFinalSubmit}
                             disabled={isLoading}
                         >

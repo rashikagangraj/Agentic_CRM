@@ -1,0 +1,14 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "rashikag/agentic-crm:1.1.0",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8100,
+      "HostPort": 80
+    }
+  ]
+}
+
