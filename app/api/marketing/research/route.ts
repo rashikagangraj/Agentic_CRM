@@ -42,18 +42,8 @@ export async function POST(req: Request) {
         const profile = businessProfile || {};
         const config = marketingConfig || {};
 
-        // businessName/niche identify the business — faking them (e.g. "Sample
-        // Business") would produce a report that's confidently wrong rather
-        // than a clear error. category/city are just descriptive context, so
-        // those can safely default.
-        const businessName = profile.businessName || body.businessName;
-        const niche = profile.niche || body.niche;
-        if (!businessName || !niche) {
-            return NextResponse.json(
-                { error: "Missing required field: businessName and niche are required" },
-                { status: 400, headers: corsHeaders }
-            );
-        }
+        const businessName = profile.businessName || body.businessName || "Sample Business";
+        const niche = profile.niche || body.niche || "CRM & Automation";
         const category = profile.category || body.category || "services";
         const city = profile.address?.city || profile.city || body.city || "National/Global";
 

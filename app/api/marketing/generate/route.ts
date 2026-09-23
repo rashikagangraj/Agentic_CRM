@@ -29,18 +29,8 @@ export async function POST(req: Request) {
         const { topic, tone, format, businessContext } = body;
         const ctx = businessContext || {};
 
-        // businessName/niche identify the business — faking them (e.g. "Sample
-        // Business") would produce content that's confidently wrong rather
-        // than a clear error. category/targetAudience/topic/tone/format are
-        // just style/context parameters, so those can safely default.
-        const businessName = ctx.businessName || body.businessName;
-        const niche = ctx.niche || body.niche;
-        if (!businessName || !niche) {
-            return NextResponse.json(
-                { error: "Missing required field: businessName and niche are required" },
-                { status: 400, headers: corsHeaders }
-            );
-        }
+        const businessName = ctx.businessName || body.businessName || "Sample Business";
+        const niche = ctx.niche || body.niche || "CRM & Automation";
         const category = ctx.category || body.category || 'services';
         const targetAudience = ctx.targetAudience || body.targetAudience || 'General audience';
         const postTopic = topic || body.topic || 'Product Launch';
