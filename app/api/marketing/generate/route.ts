@@ -98,10 +98,8 @@ Do not output JSON, just plain text ready to be copied.
     } catch (error: any) {
         console.error('Generation API Error:', error);
         return NextResponse.json(
-            {
-                content: "🚀 Transform your customer engagement and scale your business with smart AI automation."
-            },
-            { status: 200, headers: corsHeaders }
+            { error: 'Failed to generate content', details: error.message },
+            { status: 500, headers: corsHeaders }
         );
     }
 }
