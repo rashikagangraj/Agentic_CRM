@@ -176,7 +176,16 @@ function formatGenerateMarkdown(topic: string, content: string) {
 }
 
 export async function POST(req: Request) {
-    const baseUrl = new URL(req.url).origin;
+    // Call sibling routes over localhost, not this request's own public
+    // origin. On PaaS hosts (Render, etc.) a server fetching its own public
+    // HTTPS hostname from inside itself can fail at the network level
+    // (proxy hairpinning/DNS), even though the route works fine locally.
+    // The app already listens on process.env.PORT (Render injects this),
+    // so loopback is always reachable; req.url's origin is only a fallback
+    // for environments that don't set PORT.
+    const baseUrl = process.env.PORT
+        ? `http://127.0.0.1:${process.env.PORT}`
+        : new URL(req.url).origin;
 
     let raw: any = {};
     try {
