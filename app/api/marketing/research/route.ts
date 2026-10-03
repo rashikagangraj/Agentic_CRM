@@ -97,24 +97,13 @@ Return ONLY a JSON object matching this EXACT structure:
 }
 Do NOT include markdown, commentary, or backticks. Return ONLY raw JSON.`;
 
-            let geminiResponse;
-            try {
-                geminiResponse = await ai.models.generateContent({
-                    model: "gemini-2.0-flash",
-                    contents: researchPrompt,
-                    config: {
-                        responseMimeType: "application/json",
-                    },
-                });
-            } catch {
-                geminiResponse = await ai.models.generateContent({
-                    model: "gemini-1.5-flash",
-                    contents: researchPrompt,
-                    config: {
-                        responseMimeType: "application/json",
-                    },
-                });
-            }
+            const geminiResponse = await ai.models.generateContent({
+                model: "gemini-3.6-flash",
+                contents: researchPrompt,
+                config: {
+                    responseMimeType: "application/json",
+                },
+            });
 
             if (geminiResponse && geminiResponse.text) {
                 try {
